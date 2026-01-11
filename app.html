@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hoppererin Lumen Staking Explorer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3a86ff;
+            --secondary-color: #8338ec;
+            --dark-color: #121826;
+            --light-color: #f8f9fa;
+            --success-color: #38b000;
+            --warning-color: #ff9e00;
+            --danger-color: #ff0054;
+            --gray-color: #6c757d;
+            --card-bg: #1a1f2e;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark-color);
+            color: var(--light-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header Styles */
+        header {
+            background-color: rgba(18, 24, 38, 0.95);
+            border-bottom: 1px solid rgba(58, 134, 255, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 15px 0;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .logo-icon {
+            color: var(--primary-color);
+            font-size: 2rem;
+        }
+        
+        .logo-text {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 25px;
+        }
+        
+        nav a {
+            color: var(--light-color);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        nav a:hover, nav a.active {
+            background-color: rgba(58, 134, 255, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .wallet-connect {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .wallet-connect:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(58, 134, 255, 0.4);
+        }
+        
+        /* Main Content */
+        .hero {
+            padding: 60px 0 40px;
+            text-align: center;
+            background: radial-gradient(circle at 50% 0%, rgba(58, 134, 255, 0.1) 0%, transparent 50%);
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            color: #b0b7c3;
+            max-width: 700px;
+            margin: 0 auto 40px;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+        
+        .stat-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        }
+        
+        .stat-card h3 {
+            font-size: 1.1rem;
+            color: #b0b7c3;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .stat-change {
+            font-size: 0.9rem;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .positive {
+            color: var(--success-color);
+        }
+        
+        .negative {
+            color: var(--danger-color);
+        }
+        
+        /* Staking Section */
+        .staking-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+        
+        @media (max-width: 768px) {
+            .staking-section {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .staking-card, .rewards-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title i {
+            color: var(--primary-color);
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #b0b7c3;
+        }
+        
+        .input-with-max {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .input-with-max input {
+            flex: 1;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+        }
+        
+        .input-with-max button {
+            background-color: rgba(58, 134, 255, 0.2);
+            color: var(--primary-color);
+            border: 1px solid rgba(58, 134, 255, 0.3);
+            border-radius: 8px;
+            padding: 0 15px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .input-with-max button:hover {
+            background-color: rgba(58, 134, 255, 0.3);
+        }
+        
+        .balance-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            color: #b0b7c3;
+            font-size: 0.9rem;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(58, 134, 255, 0.4);
+        }
+        
+        .btn-secondary {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Rewards Card */
+        .rewards-breakdown {
+            margin-bottom: 30px;
+        }
+        
+        .reward-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .reward-item:last-child {
+            border-bottom: none;
+        }
+        
+        .reward-amount {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .claim-all {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .claim-all:hover {
+            background-color: #2d9200;
+            transform: translateY(-2px);
+        }
+        
+        /* Validators Table */
+        .validators-section {
+            margin-bottom: 60px;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background-color: rgba(58, 134, 255, 0.1);
+            padding: 18px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        td {
+            padding: 18px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        tr:hover {
+            background-color: rgba(58, 134, 255, 0.05);
+        }
+        
+        .validator-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .validator-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        
+        .status-active {
+            color: var(--success-color);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .action-btn {
+            padding: 8px 15px;
+            background-color: rgba(58, 134, 255, 0.1);
+            color: var(--primary-color);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            background-color: rgba(58, 134, 255, 0.2);
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #0d1117;
+            padding: 50px 0 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: white;
+        }
+        
+        .footer-description {
+            color: #b0b7c3;
+            line-height: 1.8;
+        }
+        
+        .footer-links h4 {
+            margin-bottom: 20px;
+            color: white;
+        }
+        
+        .footer-links ul {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links a {
+            color: #b0b7c3;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: var(--primary-color);
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+        
+        .copyright {
+            text-align: center;
+            color: #6c757d;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .stat-value {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-rocket logo-icon"></i>
+                    <span class="logo-text">HOPPERERIN</span>
+                </div>
+                
+                <nav>
+                    <ul>
+                        <li><a href="#" class="active"><i class="fas fa-home"></i> Explorer</a></li>
+                        <li><a href="#"><i class="fas fa-coins"></i> Staking</a></li>
+                        <li><a href="#"><i class="fas fa-chart-line"></i> Analytics</a></li>
+                        <li><a href="#"><i class="fas fa-history"></i> History</a></li>
+                        <li><a href="#"><i class="fas fa-question-circle"></i> Docs</a></li>
+                    </ul>
+                </nav>
+                
+                <button class="wallet-connect">
+                    <i class="fas fa-wallet"></i> Connect Wallet
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Lumen Staking Dashboard</h1>
+                <p>Stake your Lumen tokens with Hoppererin's secure and reliable validators to earn rewards while helping secure the network.</p>
+                
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <h3><i class="fas fa-layer-group"></i> Total Staked</h3>
+                        <div class="stat-value">12.84M LUMEN</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i> 4.2% (30d)
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h3><i class="fas fa-percentage"></i> Avg. APY</h3>
+                        <div class="stat-value">8.72%</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i> 0.3% (30d)
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h3><i class="fas fa-users"></i> Active Stakers</h3>
+                        <div class="stat-value">42,618</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i> 12.5% (30d)
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h3><i class="fas fa-server"></i> Active Validators</h3>
+                        <div class="stat-value">124</div>
+                        <div class="stat-change negative">
+                            <i class="fas fa-arrow-down"></i> 2.1% (30d)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <div class="container">
+            <!-- Staking & Rewards Section -->
+            <div class="staking-section">
+                <!-- Staking Card -->
+                <div class="staking-card">
+                    <h2 class="section-title">
+                        <i class="fas fa-lock"></i> Stake LUMEN
+                    </h2>
+                    
+                    <div class="input-group">
+                        <label for="stake-amount">Amount to Stake</label>
+                        <div class="input-with-max">
+                            <input type="number" id="stake-amount" placeholder="0.0" min="0" step="0.1">
+                            <button id="max-btn">MAX</button>
+                        </div>
+                    </div>
+                    
+                    <div class="balance-info">
+                        <span>Available: 1,250.50 LUMEN</span>
+                        <span>≈ $2,451.98</span>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="validator-select">Select Validator</label>
+                        <select id="validator-select" class="input-with-max" style="width: 100%; padding: 15px; background-color: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: white;">
+                            <option value="hoppererin-main">Hoppererin Main Validator (8.9% APY)</option>
+                            <option value="secure-stake">SecureStake Pool (8.5% APY)</option>
+                            <option value="lumen-guard">LumenGuard Validator (8.7% APY)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" id="stake-btn">
+                            <i class="fas fa-lock"></i> Stake Now
+                        </button>
+                        <button class="btn btn-secondary" id="unstake-btn">
+                            <i class="fas fa-unlock"></i> Unstake
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Rewards Card -->
+                <div class="rewards-card">
+                    <h2 class="section-title">
+                        <i class="fas fa-gift"></i> Your Rewards
+                    </h2>
+                    
+                    <div class="rewards-breakdown">
+                        <div class="reward-item">
+                            <span>Pending Rewards</span>
+                            <span class="reward-amount">42.75 LUMEN</span>
+                        </div>
+                        <div class="reward-item">
+                            <span>Claimed (30d)</span>
+                            <span class="reward-amount">128.50 LUMEN</span>
+                        </div>
+                        <div class="reward-item">
+                            <span>Total Staked</span>
+                            <span class="reward-amount">1,850.00 LUMEN</span>
+                        </div>
+                        <div class="reward-item">
+                            <span>Estimated APY</span>
+                            <span class="reward-amount">8.9%</span>
+                        </div>
+                    </div>
+                    
+                    <button class="claim-all">
+                        <i class="fas fa-coins"></i> Claim All Rewards
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Validators Table -->
+            <section class="validators-section">
+                <h2 class="section-title">
+                    <i class="fas fa-server"></i> Top Validators
+                </h2>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Validator</th>
+                                <th>Commission</th>
+                                <th>APY</th>
+                                <th>Total Staked</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="validator-name">
+                                        <div class="validator-icon">HH</div>
+                                        <div>
+                                            <div>Hoppererin Main</div>
+                                            <div style="font-size: 0.85rem; color: #b0b7c3;">Uptime: 99.9%</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>5%</td>
+                                <td>8.9%</td>
+                                <td>2.84M LUMEN</td>
+                                <td class="status-active"><i class="fas fa-circle"></i> Active</td>
+                                <td><button class="action-btn">Stake</button></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="validator-name">
+                                        <div class="validator-icon">SG</div>
+                                        <div>
+                                            <div>StakeGuard Pro</div>
+                                            <div style="font-size: 0.85rem; color: #b0b7c3;">Uptime: 99.7%</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>7%</td>
+                                <td>8.5%</td>
+                                <td>1.92M LUMEN</td>
+                                <td class="status-active"><i class="fas fa-circle"></i> Active</td>
+                                <td><button class="action-btn">Stake</button></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="validator-name">
+                                        <div class="validator-icon">LN</div>
+                                        <div>
+                                            <div>LumenNode Secure</div>
+                                            <div style="font-size: 0.85rem; color: #b0b7c3;">Uptime: 99.8%</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>6%</td>
+                                <td>8.7%</td>
+                                <td>1.45M LUMEN</td>
+                                <td class="status-active"><i class="fas fa-circle"></i> Active</td>
+                                <td><button class="action-btn">Stake</button></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="validator-name">
+                                        <div class="validator-icon">CS</div>
+                                        <div>
+                                            <div>CryptoStake Pool</div>
+                                            <div style="font-size: 0.85rem; color: #b0b7c3;">Uptime: 99.5%</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>8%</td>
+                                <td>8.2%</td>
+                                <td>1.12M LUMEN</td>
+                                <td class="status-active"><i class="fas fa-circle"></i> Active</td>
+                                <td><button class="action-btn">Stake</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-about">
+                    <div class="footer-logo">HOPPERERIN</div>
+                    <p class="footer-description">
+                        Hoppererin provides secure and reliable staking services for the Lumen network.
+                        Our platform ensures maximum uptime and competitive rewards for all stakers.
+                    </p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-discord"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                        <a href="#"><i class="fab fa-telegram"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Products</h4>
+                    <ul>
+                        <li><a href="#">Lumen Staking</a></li>
+                        <li><a href="#">Validator Services</a></li>
+                        <li><a href="#">Network Analytics</a></li>
+                        <li><a href="#">API Access</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">Staking Guide</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Blog</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2025 Hoppererin Staking Explorer. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Interactive JavaScript for the staking dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            // Max button functionality
+            const maxBtn = document.getElementById('max-btn');
+            const stakeAmountInput = document.getElementById('stake-amount');
+            
+            maxBtn.addEventListener('click', function() {
+                stakeAmountInput.value = '1250.50';
+            });
+            
+            // Stake button functionality
+            const stakeBtn = document.getElementById('stake-btn');
+            const unstakeBtn = document.getElementById('unstake-btn');
+            
+            stakeBtn.addEventListener('click', function() {
+                const amount = stakeAmountInput.value;
+                if (!amount || parseFloat(amount) <= 0) {
+                    alert('Please enter a valid amount to stake');
+                    return;
+                }
+                
+                const validator = document.getElementById('validator-select').value;
+                alert(`Staking ${amount} LUMEN with ${validator.split('(')[0]}...\n\nTransaction submitted!`);
+                
+                // Reset form
+                stakeAmountInput.value = '';
+            });
+            
+            unstakeBtn.addEventListener('click', function() {
+                const amount = stakeAmountInput.value;
+                if (!amount || parseFloat(amount) <= 0) {
+                    alert('Please enter a valid amount to unstake');
+                    return;
+                }
+                
+                alert(`Unstaking ${amount} LUMEN...\n\nUnstaking request submitted. Funds will be available after the 14-day unbonding period.`);
+                
+                // Reset form
+                stakeAmountInput.value = '';
+            });
+            
+            // Claim rewards button
+            const claimBtn = document.querySelector('.claim-all');
+            claimBtn.addEventListener('click', function() {
+                alert('Claiming all pending rewards (42.75 LUMEN)...\n\nRewards successfully claimed and added to your wallet!');
+            });
+            
+            // Validator action buttons
+            const actionBtns = document.querySelectorAll('.action-btn');
+            actionBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const validatorName = this.closest('tr').querySelector('.validator-name div:nth-child(2) div:first-child').textContent;
+                    alert(`Redirecting to stake with ${validatorName}...`);
+                });
+            });
+            
+            // Wallet connect button
+            const walletConnectBtn = document.querySelector('.wallet-connect');
+            walletConnectBtn.addEventListener('click', function() {
+                alert('Connecting wallet...\n\nPlease select your wallet provider from the popup.');
+            });
+            
+            // Update stats every 10 seconds (simulation)
+            function updateStats() {
+                // Randomly update the stats slightly for realism
+                const statValues = document.querySelectorAll('.stat-value');
+                
+                statValues.forEach(stat => {
+                    const currentText = stat.textContent;
+                    if (currentText.includes('LUMEN')) {
+                        const currentValue = parseFloat(currentText.replace('M LUMEN', '').trim());
+                        const change = (Math.random() - 0.5) * 0.1; // -0.05 to +0.05
+                        const newValue = Math.max(12, currentValue + change);
+                        stat.textContent = newValue.toFixed(2) + 'M LUMEN';
+                    } else if (currentText.includes('%')) {
+                        const currentValue = parseFloat(currentText.replace('%', '').trim());
+                        const change = (Math.random() - 0.5) * 0.05; // -0.025 to +0.025
+                        const newValue = Math.max(8, Math.min(9.5, currentValue + change));
+                        stat.textContent = newValue.toFixed(2) + '%';
+                    } else if (currentText.includes(',')) {
+                        const currentValue = parseInt(currentText.replace(',', '').trim());
+                        const change = Math.floor((Math.random() - 0.5) * 100); // -50 to +50
+                        const newValue = Math.max(42000, currentValue + change);
+                        stat.textContent = newValue.toLocaleString();
+                    }
+                });
+            }
+            
+            // Update stats every 30 seconds
+            setInterval(updateStats, 30000);
+        });
+    </script>
+</body>
+</html>
